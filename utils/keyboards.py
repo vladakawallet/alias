@@ -37,7 +37,7 @@ invite_start_link_btn = [
 ]
 invite_start_link_kb = InlineKeyboardMarkup(inline_keyboard=invite_start_link_btn)
 
-settings_inline_btns = [[InlineKeyboardButton(text="Winscore", callback_data="winscore")],[InlineKeyboardButton(text="Roundtimer", callback_data="roundtimer"),],
+settings_inline_btns = [[InlineKeyboardButton(text="Winscore", callback_data="winscore"), InlineKeyboardButton(text="Roundtimer", callback_data="roundtimer"),],
                         # [InlineKeyboardButton(text="Language", callback_data="language"),],
                         [InlineKeyboardButton(text="Cancel", callback_data="cancelsettings")]]
 settings_inline_kb = InlineKeyboardMarkup(inline_keyboard=settings_inline_btns)

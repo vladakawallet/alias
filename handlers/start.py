@@ -17,7 +17,7 @@ async def start_command(message: Message, command: CommandObject):
             _, chat_id = decoded_args.split('|')
             print(command.args)
             await accept_invite_query(chat_id, message.from_user.first_name, message.from_user.id)
-            await message.answer("Вас додано у гру!")
+            await message.answer("Ти приєднався до гри в Еліас")
             return
         if message.chat.type == 'private':
             await message.answer(LANGUAGES['uk']['private_greeting'].format(name=message.from_user.first_name),
@@ -31,6 +31,7 @@ async def start_command(message: Message, command: CommandObject):
                 else:
                     if await rediscli.check_existed_session(message.chat.id) == False:
                         await rediscli.init_session(message.chat.id)
+                        logger.info(f"session is created on {message.chat.id}")
                     await message.answer(LANGUAGES['uk']['group_greeting_admin'], parse_mode=ParseMode.MARKDOWN)
             else:
                 await message.answer(LANGUAGES['uk']['group_greeting'], parse_mode=ParseMode.MARKDOWN)

@@ -39,7 +39,7 @@ async def correct(message: Message, state: FSMContext):
             if score >= int(session_data["win_score"]):
                 await bot.delete_message(chat_id=team["group_id"], message_id=session_data["teams_message"])
                 await bot.edit_message_text(text=f"Раунд завершено. Перемогла команда {team["team"]}! Кількість очок: {score}",
-                                        chat_id=team["group_id"], message_id=team["result_message"], reply_markup=keyboards.startgroup_inline_kb)
+                                        chat_id=team["group_id"], message_id=team["result_message"])
                 await message.answer("Вітаю, твоя команда перемогла!", reply_markup=ReplyKeyboardRemove())
                 await bot.send_message(text="Вітаю, твоя команда перемогла!", chat_id=session_data["teams"][team["team"]]["members"][1][1])
                 await state.clear()
@@ -57,8 +57,9 @@ async def correct(message: Message, state: FSMContext):
             msg = await bot.send_message(chat_id=team["group_id"],
                             text=f"Наступна команда <b>{tm}</b>.\n<a href=\"tg://user?id={curTeam[0][1]}\">{curTeam[0][0]}</a> відгадує, <a href=\"tg://user?id={curTeam[1][1]}\">{curTeam[1][0]}</a> пояснює", parse_mode=ParseMode.HTML)
             session_data["teams_message"] = msg.message_id
-            await bot.send_message(chat_id=curTeam[1][1], text="Тисни кнопку почати, і ти отримаєш перше слово!", 
-                            reply_markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text="Почати!", callback_data=f"prvtGame: {tm} {team["group_id"]}")]]))
+            await bot.send_message(chat_id=curTeam[1][1], text="Тисни *почати*🚀", 
+                            reply_markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text="Почати!", callback_data=f"prvtGame: {tm} {team["group_id"]}")]]),
+                            parse_mode=ParseMode.MARKDOWN)
             curTeam[0], curTeam[1] = curTeam[1], curTeam[0]
             await state.clear()
             # await create_timer_task(team["group_id"], 20, "game")
@@ -122,7 +123,7 @@ async def incorrect(message: Message, state: FSMContext):
             if score >= int(session_data["win_score"]):
                 await bot.delete_message(chat_id=team["group_id"], message_id=session_data["teams_message"])
                 await bot.edit_message_text(text=f"Раунд завершено. Перемогла команда {team["team"]}! Кількість очок: {score}",
-                                        chat_id=team["group_id"], message_id=team["result_message"], reply_markup=keyboards.startgroup_inline_kb)
+                                        chat_id=team["group_id"], message_id=team["result_message"])
                 await message.answer("Вітаю, твоя команда перемогла!", reply_markup=ReplyKeyboardRemove())
                 await bot.send_message(text="Вітаю, твоя команда перемогла!", chat_id=session_data["teams"][team["team"]]["members"][1][1])
                 await state.clear()
@@ -140,8 +141,9 @@ async def incorrect(message: Message, state: FSMContext):
             msg = await bot.send_message(chat_id=team["group_id"],
                             text=f"Наступна команда <b>{tm}</b>.\n<a href=\"tg://user?id={curTeam[0][1]}\">{curTeam[0][0]}</a> відгадує, <a href=\"tg://user?id={curTeam[1][1]}\">{curTeam[1][0]}</a> пояснює", parse_mode=ParseMode.HTML)
             session_data["teams_message"] = msg.message_id
-            await bot.send_message(chat_id=curTeam[1][1], text="Тисни кнопку почати, і ти отримаєш перше слово!", 
-                            reply_markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text="Почати!", callback_data=f"prvtGame: {tm} {team["group_id"]}")]]))
+            await bot.send_message(chat_id=curTeam[1][1], text="Тисни *почати*🚀", 
+                            reply_markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text="Почати!", callback_data=f"prvtGame: {tm} {team["group_id"]}")]]),
+                            parse_mode=ParseMode.MARKDOWN)
             curTeam[0], curTeam[1] = curTeam[1], curTeam[0]
             await state.clear()
             await timer_manager.recreate_timer_task(team["group_id"], 20, "game")

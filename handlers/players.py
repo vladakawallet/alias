@@ -41,7 +41,7 @@ async def add_user(callback: CallbackQuery, state: FSMContext):
                         session_data["string"] = result_string
                         await callback.answer() 
                         if len(session_data["players"]) != 0:
-                            result_string += "\nВведи назву наступної команди, а потім вибери гравців!"
+                            result_string += "\nВведи назву наступної команди, а потім вибери гравців"
                             await bot.edit_message_text(chat_id=callback.message.chat.id, message_id=session_data["teams_message"],
                                         text=result_string, parse_mode=ParseMode.HTML, reply_markup=None)
                             await state.set_state(GameSetup.teams)

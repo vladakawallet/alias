@@ -1,4 +1,4 @@
-from bot_setup import bot, rediscli, logger, timer_manager, mysqlcli
+from bot_setup import bot, rediscli, logger, timer_manager, mysqlcli, mysql_pool
 from aiogram.enums.parse_mode import ParseMode
 from aiogram.fsm.context import FSMContext
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery, ReplyKeyboardMarkup, KeyboardButton
@@ -20,8 +20,9 @@ async def start_game_callback(callback: CallbackQuery):
         await bot.edit_message_text(chat_id=callback.message.chat.id, message_id=session_data["teams_message"], 
                             text=f"Розпочинає команда <b>{tm}</b>.\n<a href=\"tg://user?id={curTeam[0][1]}\">{curTeam[0][0]}</a> відгадує, <a href=\"tg://user?id={curTeam[1][1]}\">{curTeam[1][0]}</a> пояснює", 
                             parse_mode=ParseMode.HTML)
-        await bot.send_message(chat_id=curTeam[1][1], text="Тисни кнопку почати, і ти отримаєш перше слово!",
-                            reply_markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text="Почати!", callback_data=f"prvtGame: {tm} {callback.message.chat.id}")]]))
+        test = await bot.send_message(chat_id=curTeam[1][1], text="Тисни *почати*🚀",
+                            reply_markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text="Почати!", callback_data=f"prvtGame: {tm} {callback.message.chat.id}")]]),
+                            parse_mode=ParseMode.MARKDOWN)
         curTeam[0], curTeam[1] = curTeam[1], curTeam[0]
         session_data["teams"][tm]["members"] = curTeam
         if mysql_pool is None:
@@ -57,7 +58,7 @@ async def start_privategame_callback(callback: CallbackQuery, state: FSMContext)
     try:
         session_data = await rediscli.redis_get_pipeline(data[2], ["teams", "timer", "words", "turn"])
         index = int(session_data["turn"])
-        if index >= len(session_data["teams"].keys()):
+        if index == len(session_data["teams"].keys())-1:
             index = 0
         else:
             index += 1
@@ -70,6 +71,7 @@ async def start_privategame_callback(callback: CallbackQuery, state: FSMContext)
         await state.update_data(team=data[1], guessed=0, missed=0, group_id=data[2], words=words, score=score, result_message=msg.message_id)
         await bot.send_message(chat_id=callback.message.chat.id, text=f"{word}",
                             reply_markup=ReplyKeyboardMarkup(keyboard=[[KeyboardButton(text="✅")], [KeyboardButton(text="Пропуск❌")]], resize_keyboard=True))
+        await bot.edit_message_text(text="*Гру почато!*", chat_id=callback.message.chat.id, message_id=callback.message.message_id, parse_mode=ParseMode.MARKDOWN)
         await timer_manager.recreate_timer_task(data[2], int(session_data["timer"]), f"prvtgame {callback.message.chat.id}", callback.message.chat.id)
         logger.info(f"game started on {data[2]}")
     except RedisError as e:

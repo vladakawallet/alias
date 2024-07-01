@@ -5,6 +5,7 @@ from utils.languages import LANGUAGES
 import base64
 from redis import RedisError
 from handlers.utils import check_bot_admin
+import utils.keyboards as keyboards
 
 async def accept_invite_query(chat_id, first_name, user_id):
     try:
@@ -41,7 +42,7 @@ async def game_command(message: Message):
     try:
         if message.chat.type == 'private': 
             await bot.delete_message(message.chat.id, message.message_id)
-            await bot.send_message(message.chat.id, "Ця команда доступна лише у гпуповому чаті!")
+            await bot.send_message(message.chat.id, "Команда доступна лише у гпуповому чаті!", reply_markup=keyboards.start_inline_kb)
             return
         if await check_bot_admin(message.chat.id):
             main_state = await rediscli.get_session_field(message.chat.id, "main_state")

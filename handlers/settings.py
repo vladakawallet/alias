@@ -11,7 +11,7 @@ from redis import RedisError
 async def settings_command(message: Message, state: FSMContext):
     try:  
         if message.chat.type == "private":
-            await message.answer("Команда працює лише у груповому чаті!")
+            await message.answer("Команда працює лише у груповому чаті!", reply_markup=keyboards.start_inline_kb)
             await bot.delete_message(message.chat.id, message.message_id)
         elif message.chat.type == "group" or message.chat.type == "supergroup":
             main_state = await rediscli.get_session_field(message.chat.id, "main_state")
@@ -22,7 +22,7 @@ async def settings_command(message: Message, state: FSMContext):
                 await message.answer(LANGUAGES['uk']['bot_is_still_member'])
                 await bot.delete_message(message.chat.id, message.message_id)
                 return
-            msg = await message.answer(f"<a href=\"tg://user?id={message.from_user.id}\">{message.from_user.first_name}</a>, Вибери опцію для налаштування:", reply_markup=keyboards.settings_inline_kb, parse_mode=ParseMode.HTML)
+            msg = await message.answer(f"<a href=\"tg://user?id={message.from_user.id}\">{message.from_user.first_name}</a>, oбери опцію для налаштування:", reply_markup=keyboards.settings_inline_kb, parse_mode=ParseMode.HTML)
             await state.set_state(Settings.menu)
             await state.update_data(msg_id=msg.message_id)
             logger.info(f"settings state is entered on {message.chat.id}")
@@ -59,9 +59,9 @@ async def new_winscore(message: Message, state: FSMContext):
             await state.set_state(Settings.menu)
             logger.info(f"winscore is changed to {message.text} on {message.chat.id}")
         else: 
-            await bot.edit_message_text(chat_id=message.chat.id, message_id=msgid["msg_id"], text="Невірне значення! Введи число від 5 до 25!")
+            await bot.edit_message_text(chat_id=message.chat.id, message_id=msgid["msg_id"], text="Введи число від 5 до 25!")
     except ValueError as e:
-        await bot.edit_message_text(chat_id=message.chat.id, message_id=msgid["msg_id"], text="Невірне значення! Введи число від 10 до 25!")
+        await bot.edit_message_text(chat_id=message.chat.id, message_id=msgid["msg_id"], text="Введи число від 10 до 25!")
     except RedisError as e:
         logger.error(f"redis unable to set a new winscore in {message.chat.id}: {e}")
         await message.answer(LANGUAGES['en']['database_error'])
@@ -95,9 +95,9 @@ async def new_roundtimer(message: Message, state: FSMContext):
                 await state.update_data(msg_id=msg.message_id)
                 logger.info(f"roundtimer is changed to {message.text} on {message.chat.id}")
             else: 
-                await message.answer(chat_id=message.chat.id, message_id=msgid["msg_id"], text="Невірне значення! Введи число від 30 до 120!")
+                await message.answer(chat_id=message.chat.id, message_id=msgid["msg_id"], text="Введи число від 30 до 120!")
     except ValueError as e:
-        await message.answer(chat_id=message.chat.id, message_id=msgid["msg_id"], text="Невірне значення! Введи число від 30 до 120")
+        await message.answer(chat_id=message.chat.id, message_id=msgid["msg_id"], text="Введи число від 30 до 120")
     except RedisError as e:
         logger.error(f"redis unable to set a new roundtimer in {message.chat.id}: {e}")
         await message.answer(LANGUAGES['en']['database_error'])
@@ -111,7 +111,7 @@ async def new_roundtimer(message: Message, state: FSMContext):
 async def cancel_settings(callback: CallbackQuery, state: FSMContext):
     try:
         msgid = await state.get_data()
-        await bot.edit_message_text(text="Вихід з режиму налаштувань!", chat_id=callback.message.chat.id, message_id=msgid["msg_id"])
+        await bot.edit_message_text(text="Вихід з режиму налаштувань", chat_id=callback.message.chat.id, message_id=msgid["msg_id"])
         await state.clear()
         logger.info(f"settings state is exited on {callback.message.chat.id}")
     except Exception as e:

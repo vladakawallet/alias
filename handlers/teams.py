@@ -16,7 +16,7 @@ async def teams_mode(callback: CallbackQuery, state: FSMContext):
         if len(session_data["players"]) % 2 != 0:
             await callback.answer("Гра почнеться лише з парною кількістю гравців")
         elif len(session_data["players"]) < 4:
-            await callback.answer("Замало гравців для початку! Мінімальна к-ть: 4")
+            await callback.answer("Мінімальна кількість: 4")
         else:
             await bot.edit_message_text(chat_id=callback.message.chat.id, message_id=session_data["start_message"],
             text=f"<b>Створюємо команди</b>\n<a href=\"tg://user?id={callback.from_user.id}\">{callback.from_user.first_name}</a>, введи назву кожної команди, а потім вибери гравців", parse_mode=ParseMode.HTML)
@@ -46,10 +46,10 @@ async def team_creation(message: Message, state: FSMContext):
         session_data = await rediscli.redis_get_pipeline(message.chat.id, ["start_message", "teams", "players", "string", "teams_message"])
         if len(message.text) > 15:
             await bot.delete_message(message.chat.id, message.message_id)
-            await bot.edit_message_text("Назва команди занадто довга, придумайте щось коротше ніж 15 символів", message.chat.id, session_data["start_message"])
+            await bot.edit_message_text("Назва команди занадто довга (макс. 15 символів)", message.chat.id, session_data["start_message"])
         elif message.text in session_data["teams"].keys():
             await bot.delete_message(message.chat.id, message.message_id)
-            await bot.edit_message_text("Команда з такою назвою вже існує, введи іншу!", message.chat.id, session_data["start_message"])
+            await bot.edit_message_text("Команда з такою назвою вже існує!", message.chat.id, session_data["start_message"])
         else:
             builder = InlineKeyboardBuilder()
             if len(session_data["teams"].items()) == 0:    

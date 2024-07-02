@@ -20,7 +20,7 @@ class MySQLPooling:
         try:
             async with pool.acquire() as conn:
                 async with conn.cursor() as cur:
-                    await cur.execute(f"select `word` from `alias_schema`.`words` limit {limit} offset {offset}")
+                    await cur.execute(f"select `word` from `alias_schema`.`filtered_words` limit {limit} offset {offset}")
                     res = await cur.fetchall()
                 res = [item[0] for item in res]
                 return res

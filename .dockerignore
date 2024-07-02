@@ -1,0 +1,14 @@
+__pycache__/
+venv/
+back_up.py 
+sqlpushtest.py 
+alias_finals.py 
+alias_finals_copy.py 
+app.log
+*.txt
+*.env
+!requirements.txt
+dist/
+build/
+Dockerfile
+.dockerignore

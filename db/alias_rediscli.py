@@ -17,7 +17,8 @@ class RedisConnection:
         return cls._instance
 
     def _initialize(self):
-        self.pool = redis.ConnectionPool(max_connections=100).from_url("redis://localhost")
+        self.pool = redis.ConnectionPool(max_connections=100).from_url("redis://redis")
+        # self.pool = redis.ConnectionPool(max_connections=100).from_url("redis://localhost")
         self.redis_logger = logging.getLogger(__name__)
         self.redis_logger.setLevel(logging.INFO)
 

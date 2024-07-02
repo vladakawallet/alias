@@ -33,7 +33,7 @@ class AliasTimerManager:
             elif state == "game":
                 await self.bot.send_message(chat_id, text="Гру завершено, гравець не відповідає")
                 await self.bot.edit_message_text("На жаль, ти не встиг почати гру", prvtchat_id, msg_id)
-                data = {"main_state": "", "teams_message": "", "turn": 0, "teams": {}, "start_message": "", "string": "", "players": [], "timer_task": ""}
+                data = {"main_state": "", "teams_message": "", "turn": 0, "teams": {}, "start_message": "", "string": "", "players": [], "timer_task": "", "words": []}
                 await self.rediscli.redis_set_pipeline(chat_id, data)
             elif state.startswith("prvtgame"):
                 await self.bot.send_message(chat_id=prvtchat_id, text="Залишилось 15 секунд!")

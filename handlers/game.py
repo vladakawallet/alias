@@ -36,23 +36,31 @@ async def start_game_callback(callback: CallbackQuery):
         logger.info(f"game state on {callback.message.chat.id}")
     except RedisError as e:
         logger.error(f"redis error in {callback.message.chat.id} on game state: {e}")
-        await bot.send_message(callback.message.chat.id, LANGUAGES['en']['database_error'])
+        await bot.edit_message_text(LANGUAGES['en']['database_error'], curTeam[1][1], msg.message_id)
+        # await bot.send_message(callback.message.chat.id, LANGUAGES['en']['database_error'])
         await timer_manager.cancel_timer_task(callback.message.chat.id)
     except aiomysql.Error as e:
         logger.error(f"mysql error in {callback.message.chat.id} on game state: {e}")
-        await bot.send_message(callback.message.chat.id, LANGUAGES['en']['database_error'])
-        await timer_manager.cancel_timer_task(callback.message.chat.id)
-    except Exception as e:
-        logger.error(f"an error in {callback.message.chat.id} on game state: {e}")
-        await bot.send_message(callback.message.chat.id, LANGUAGES['en']['general_error'])
+        await bot.edit_message_text(LANGUAGES['en']['database_error'], curTeam[1][1], msg.message_id)
+        # await bot.send_message(callback.message.chat.id, LANGUAGES['en']['database_error'])
         await timer_manager.cancel_timer_task(callback.message.chat.id)
         try: 
-            data = {"main_state": "", "teams_message": "", "turn": 0, "teams": {}, "start_message": "", "string": "", "players": [], "timer_task": ""}
+            data = {"main_state": "", "teams_message": "", "turn": 0, "teams": {}, "start_message": "", "string": "", "players": [], "timer_task": "", "words": []}
+            await rediscli.redis_set_pipeline(callback.message.chat.id, data)
+        except RedisError as e:
+             logger.error(f"redis error in {callback.message.chat.id} on game state: {e}")
+    except Exception as e:
+        logger.error(f"an error in {callback.message.chat.id} on game state: {e}")
+        await bot.edit_message_text(LANGUAGES['en']['database_error'], curTeam[1][1], msg.message_id)
+        # await bot.send_message(callback.message.chat.id, LANGUAGES['en']['general_error'])
+        await timer_manager.cancel_timer_task(callback.message.chat.id)
+        try: 
+            data = {"main_state": "", "teams_message": "", "turn": 0, "teams": {}, "start_message": "", "string": "", "players": [], "timer_task": "", "words": []}
             await rediscli.redis_set_pipeline(callback.message.chat.id, data)
         except RedisError as e:
              logger.error(f"redis error in {callback.message.chat.id} on game state: {e}")
 
-async def start_privategame_callback(callback: CallbackQuery, state: FSMContext):
+async def start_privategame_callback(callback: CallbackQuery, state: FSMContext): 
     try:
         data = callback.data.split()
         await callback.answer("Гру почато!")

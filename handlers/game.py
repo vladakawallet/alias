@@ -20,7 +20,7 @@ async def start_game_callback(callback: CallbackQuery):
         await bot.edit_message_text(chat_id=callback.message.chat.id, message_id=session_data["teams_message"], 
                             text=f"Розпочинає команда <b>{tm}</b>.\n<a href=\"tg://user?id={curTeam[0][1]}\">{curTeam[0][0]}</a> відгадує, <a href=\"tg://user?id={curTeam[1][1]}\">{curTeam[1][0]}</a> пояснює", 
                             parse_mode=ParseMode.HTML)
-        test = await bot.send_message(chat_id=curTeam[1][1], text="Тисни *почати*🚀",
+        msg = await bot.send_message(chat_id=curTeam[1][1], text="Тисни *почати*🚀",
                             reply_markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text="Почати!", callback_data=f"prvtGame: {tm} {callback.message.chat.id}")]]),
                             parse_mode=ParseMode.MARKDOWN)
         curTeam[0], curTeam[1] = curTeam[1], curTeam[0]
@@ -32,7 +32,7 @@ async def start_game_callback(callback: CallbackQuery):
         session_data["offset"] = int(offset)+100
         session_data["words"] = words
         await rediscli.redis_set_pipeline(callback.message.chat.id, session_data)
-        await timer_manager.recreate_timer_task(callback.message.chat.id, 20, "game")
+        await timer_manager.recreate_timer_task(callback.message.chat.id, 20, "game", curTeam[1][1], msg.message_id)
         logger.info(f"game state on {callback.message.chat.id}")
     except RedisError as e:
         logger.error(f"redis error in {callback.message.chat.id} on game state: {e}")
@@ -53,9 +53,9 @@ async def start_game_callback(callback: CallbackQuery):
              logger.error(f"redis error in {callback.message.chat.id} on game state: {e}")
 
 async def start_privategame_callback(callback: CallbackQuery, state: FSMContext):
-    await callback.answer("Гру почато!")
-    data = callback.data.split()
     try:
+        data = callback.data.split()
+        await callback.answer("Гру почато!")
         session_data = await rediscli.redis_get_pipeline(data[2], ["teams", "timer", "words", "turn"])
         index = int(session_data["turn"])
         if index == len(session_data["teams"].keys())-1:

@@ -11,7 +11,7 @@ class AliasTimerManager:
         self.bot = bot
         self.timer_manager = {}
 
-    async def timer(self, chat_id: int | str, duration: int, state: str, prvtchat_id=None):
+    async def timer(self, chat_id: int | str, duration: int, state: str, prvtchat_id=None, msg_id=None):
         await asyncio.sleep(duration)
         logger.info(f"timer went off on {state}")
         try:
@@ -32,6 +32,7 @@ class AliasTimerManager:
                 await self.rediscli.redis_set_pipeline(chat_id, data)
             elif state == "game":
                 await self.bot.send_message(chat_id, text="Гру завершено, гравець не відповідає")
+                await self.bot.edit_message_text("На жаль, ти не встиг почати гру", prvtchat_id, msg_id)
                 data = {"main_state": "", "teams_message": "", "turn": 0, "teams": {}, "start_message": "", "string": "", "players": [], "timer_task": ""}
                 await self.rediscli.redis_set_pipeline(chat_id, data)
             elif state.startswith("prvtgame"):
@@ -59,10 +60,10 @@ class AliasTimerManager:
             await self.bot.send_message(chat_id, LANGUAGES['en']['general_error'])
 
 
-    async def create_timer_task(self, chat_id: int | str, duration: int, state: str, prvtchat_id=None):
+    async def create_timer_task(self, chat_id: int | str, duration: int, state: str, prvtchat_id=None, msg_id=None):
         try: 
             logger.info(f"timer task created on {state}")
-            task = asyncio.create_task(self.timer(chat_id, duration, state, prvtchat_id))
+            task = asyncio.create_task(self.timer(chat_id, duration, state, prvtchat_id, msg_id))
             self.timer_manager[str(chat_id)] = task
             await self.rediscli.update_session_field(chat_id, "timer_task", state) 
         except RedisError as e:
@@ -72,9 +73,9 @@ class AliasTimerManager:
             logger.error(f"failed to create a timer tasks: {e}")
             await self.bot.send_message(chat_id, LANGUAGES['en']['general_error'])
 
-    async def recreate_timer_task(self, chat_id: int | str, duration: int, next_state: str, prvtchat_id=None):
+    async def recreate_timer_task(self, chat_id: int | str, duration: int, next_state: str, prvtchat_id=None, msg_id=None):
         self.timer_manager[str(chat_id)].cancel()
-        await self.create_timer_task(chat_id, duration, next_state, prvtchat_id)
+        await self.create_timer_task(chat_id, duration, next_state, prvtchat_id, msg_id)
         # logger.info(f"timer task recreated on {next_state }")
 
     async def cancel_timer_task(self, chat_id: int | str):

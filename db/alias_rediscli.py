@@ -6,6 +6,8 @@ import json
 import logging
 from redis.exceptions import RedisError
 from utils.alias_logger import logger
+from config import REDIS_DB, REDIS_HOST, REDIS_PORT
+
 
 class RedisConnection:
     _instance = None
@@ -17,8 +19,8 @@ class RedisConnection:
         return cls._instance
 
     def _initialize(self):
-        self.pool = redis.ConnectionPool(max_connections=100).from_url("redis://redis")
-        # self.pool = redis.ConnectionPool(max_connections=100).from_url("redis://localhost")
+        # self.pool = redis.ConnectionPool(max_connections=100).from_url(f"redis://{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB}")
+        self.pool = redis.ConnectionPool(max_connections=100).from_url("redis://localhost")
         self.redis_logger = logging.getLogger(__name__)
         self.redis_logger.setLevel(logging.INFO)
 

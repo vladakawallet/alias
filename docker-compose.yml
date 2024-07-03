@@ -1,36 +1,46 @@
 services:
   redis:
-    image: redis:7.2.5
+    image: redis:latest
+    environment: 
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - REDIS_DB=${REDIS_DB}
     command: 
       - redis-server
     restart: on-failure
     ports: 
       - "6379:6379"
-  mysql: 
-    image: mysql:8.0.37
-    environment:
-      - MYSQL_ROOT_PASSWORD=replaY12.34.54.
-      - MYSQL_HOST=127.0.0.1
-      - MYSQL_PASSWORD=replaY12.34.54.
-      - MYSQL_DATABASE=alias_schema
-      - MYSQL_PORT=3306
-    restart: on-failure
     volumes:
-      - mysql_data:/var/lib/mysql
-    ports: 
-      - "3306:3306"
+      - redis_data:/data
+
+  # mysql: 
+  #   image: mysql:8.0.37
+  #   # environment:
+  #     # - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+  #     # - MYSQL_HOST=${MYSQL_HOST}
+  #     # - MYSQL_PORT=${MYSQL_PORT}
+  #   restart: on-failure
+  #   volumes:
+  #     - mysql_data:/var/lib/mysql
+  #   ports: 
+  #     - "3306:3306"
 
   bot: 
     build: .
     command: sh -c "python -m main"
     environment:
-      - TOKEN=6937126710:AAE7tO6s4_o6llRnU2pxgYwau5ruu19sytM
+      - TOKEN=${TOKEN}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - REDIS_DB=${REDIS_DB}
     restart: always
     depends_on:
-      - mysql
+      # - mysql
       - redis
 
 
 volumes:
-  mysql_data:
+  # mysql_data:
+  #   driver: local
+  redis_data:
     driver: local
